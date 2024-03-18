@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const PartnerModel = require("../models/Partner")
 const OrderModel = require("../models/Order");
 const CounterModel = require("../models/Counter")
 const UserModel = require("../models/User");
@@ -11,9 +12,23 @@ const upload = multer({ storage: storage });
 const CoinsModel = require('../models/Coins');
 const createInvoice = require("./createInvoice")
 const RefundModel = require("../models/Refund")
-
+const { getMessaging } = require("firebase-admin/messaging");
 dotenv.config();
 const secretKey = process.env.JWT_SECRET_KEY
+
+async function sendNotificationsToPartnersAsync(partnerTokens, notification) {
+    try {
+        await Promise.all(partnerTokens.map((token, index) => {
+            getMessaging().send({ token: token, notification: notification })
+            console.log(index)
+        }
+
+        ));
+    } catch (error) {
+        console.error("Error sending notifications to partners:", error);
+    }
+}
+
 
 async function getNextSequenceValue() {
     try {
@@ -130,6 +145,18 @@ router.post('/create-order', verify, async (req, res) => {
                 'user.phone': user.phone,
                 'productDetails.slug': productDetails.slug,
             });
+
+            const partners = await PartnerModel.find({ pinCodes: orderPincode, token: { $ne: "" } });
+            const partnerTokens = partners.map(partner => partner.token);
+            const notification = {
+                title: `${savedOrder.productDetails.name} 📱`,
+                body: `You have received a new order 📃`
+            };
+            // Send notifications to partners asynchronously
+            sendNotificationsToPartnersAsync(partnerTokens, notification);
+
+
+
 
             res.status(201).json({ message: 'Order created successfully', order: savedOrder });
         } catch (error) {
@@ -407,6 +434,35 @@ router.get('/generate-invoice/:phone/:orderID', verify, async (req, res) => {
     else {
         res.status(403).json({ error: "No Access to perform this action" })
     }
+});
+
+router.post("/send", function (req, res) {
+    const token = "cMoXpjPpSFOjcZ6cAA9jmJ:APA91bH5X5wYA9iTyKbqjlCFOIQD1ymOrHIffhFH1T9OkrTWPV2oTlWrmeuZXsCc_Y8S3IUDG-jId1Wu50DDuBKPFbZeaSx8sMKNerLRiOhn0U-V43Xo7GS2P8yTOOqVsxXV3sCAUSVn"
+
+    const message = {
+        notification: {
+            title: "I Phone 6S 32GB",
+            body: "You have got a new order "
+        },
+        token,
+    };
+
+    getMessaging()
+        .send(message)
+        .then((response) => {
+            res.status(200).json({
+                message: "Successfully sent message",
+                token,
+            });
+            console.log("Successfully sent message:", response);
+        })
+        .catch((error) => {
+            res.status(400);
+            res.send(error);
+            console.log("Error sending message:", error);
+        });
+
+
 });
 
 

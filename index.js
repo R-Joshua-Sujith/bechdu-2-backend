@@ -45,12 +45,12 @@ initializeApp({
 });
 
 app.post("/send", function (req, res) {
-    const token = "fYrGlj94QvmOfEWSZAQrty:APA91bEhnOFyyJrejYAO8wLlcOQhRXvWvEU1HDuoG1-uldsTlQumKSgRNSDtosgkpjfneB_M0hyOgggjkwJLyGVOQkafu8V1j8dDuSNPJ8x5VvGjoCgsgxblHtpsKUjo8FZ3C0MGgqCV"
+    const token = "cMoXpjPpSFOjcZ6cAA9jmJ:APA91bH5X5wYA9iTyKbqjlCFOIQD1ymOrHIffhFH1T9OkrTWPV2oTlWrmeuZXsCc_Y8S3IUDG-jId1Wu50DDuBKPFbZeaSx8sMKNerLRiOhn0U-V43Xo7GS2P8yTOOqVsxXV3sCAUSVn"
 
     const message = {
         notification: {
-            title: "febin",
-            body: 'feobji is god'
+            title: "I Phone 6S 32GB",
+            body: "You have got a new order "
         },
         token,
     };

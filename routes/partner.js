@@ -8,8 +8,18 @@ const jwt = require("jsonwebtoken");
 const DynamicModel = require('../models/Dynamic')
 const createPaymentInvoice = require("./createPaymentInvoice")
 const RefundModel = require("../models/Refund")
-
+const { getMessaging } = require("firebase-admin/messaging");
 dotenv.config();
+
+async function sendNotification(token, notification) {
+    try {
+        await getMessaging().send({ token: token, notification: notification });
+        console.log("Notification sent successfully to partner with token:", token);
+    } catch (error) {
+        console.error("Error sending notification to partner with token:", token, "Error:", error);
+    }
+}
+
 
 const secretKey = process.env.JWT_SECRET_KEY
 const authkey = process.env.MSG91_AUTH_KEY
@@ -965,6 +975,12 @@ router.post("/assign-order/:partnerPhone/:pickUpPersonId/:orderId", verify, asyn
                 message: `Order Assigned to Pickup person ${pickUpPerson.name} (${pickUpPerson.phone})`,
             });
             await order.save();
+            const notification = {
+                title: `Hey ${pickUpPerson.name} `,
+                body: `A new order is waiting for you ${order.productDetails.name} !!`
+            }
+            const token = pickUpPerson.token;
+            sendNotification(token, notification)
             res.status(200).json({ message: "Order Assigned Successfully" })
         } else {
             res.status(403).json({ error: `No Access to perform this action ` });
