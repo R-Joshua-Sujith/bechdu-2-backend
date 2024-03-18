@@ -980,7 +980,10 @@ router.post("/assign-order/:partnerPhone/:pickUpPersonId/:orderId", verify, asyn
                 body: `A new order is waiting for you ${order.productDetails.name} !!`
             }
             const token = pickUpPerson.token;
-            sendNotification(token, notification)
+            if (token) {
+                sendNotification(token, notification)
+            }
+
             res.status(200).json({ message: "Order Assigned Successfully" })
         } else {
             res.status(403).json({ error: `No Access to perform this action ` });
@@ -1138,7 +1141,14 @@ router.put("/requote/partner/:phone/:orderId", verify, async (req, res) => {
 
                 // Save updated order
                 await order.save();
-
+                const notification = {
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has requoted order ${order.orderId} !!`
+                }
+                const token = user.token;
+                if (token) {
+                    sendNotification(token, notification)
+                }
                 res.status(200).json({ message: "Requote done successfully" });
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
@@ -1276,6 +1286,14 @@ router.put("/cancel-order/:orderId/:phone", verify, async (req, res) => {
                 });
                 await order.save();
                 await newRefund.save();
+                const notification = {
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has cancelled order ${order.orderId} !!`
+                }
+                const token = user.token;
+                if (token) {
+                    sendNotification(token, notification)
+                }
                 res.status(200).json({ message: "Order cancelled successfully" });
 
             } else {
@@ -1351,6 +1369,14 @@ router.put("/complete-order/:orderId/:phone", verify, async (req, res) => {
                 order.deviceInfo = deviceInfo
                 order.status = 'Completed';
                 await order.save();
+                const notification = {
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has completed order ${order.orderId} !!`
+                }
+                const token = user.token;
+                if (token) {
+                    sendNotification(token, notification)
+                }
                 res.status(200).json({ message: "Order completed successfully" });
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
@@ -1394,6 +1420,7 @@ router.put("/reschedule-order/:orderId/:phone", verify, async (req, res) => {
                 order.pickUpDetails = pickUpDetails;
                 order.status = 'rescheduled';
                 await order.save();
+
                 res.status(200).json({ message: "Order rescheduled  successfully" });
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
@@ -1428,6 +1455,14 @@ router.put("/reschedule-order/:orderId/:phone", verify, async (req, res) => {
                 order.pickUpDetails = pickUpDetails;
                 order.status = 'rescheduled';
                 await order.save();
+                const notification = {
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has rescheduled order ${order.orderId} !!`
+                }
+                const token = user.token;
+                if (token) {
+                    sendNotification(token, notification)
+                }
                 res.status(200).json({ message: "Order rescheduled  successfully" });
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
