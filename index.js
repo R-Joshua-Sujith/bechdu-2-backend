@@ -24,6 +24,7 @@ const pickUpRoute = require("./routes/pickUp");
 const refundRoute = require("./routes/refund");
 const paymentRoute = require("./routes/payment")
 const contactRoute = require("./routes/contact")
+const file = require("./notify-dd676-firebase-adminsdk-3qhh5-feee54f776.json")
 
 dotenv.config();
 const app = express();
@@ -37,7 +38,7 @@ mongoose.connect(process.env.MONGO_URL)
     .then(() => console.log("DB Connection Successful"))
     .catch((err) => console.log(err))
 
-process.env.GOOGLE_APPLICATION_CREDENTIALS;
+// process.env.GOOGLE_APPLICATION_CREDENTIALS;
 
 initializeApp({
     credential: applicationDefault(),
