@@ -1280,8 +1280,8 @@ router.put("/cancel-order/:orderId/:phone", verify, async (req, res) => {
                 const newRefund = new RefundModel({
                     orderID: order.orderId,
                     cancellationReason: cancellationReason,
-                    partnerPhone: partner.phone,
-                    partnerName: partner.name,
+                    partnerPhone: user.phone,
+                    partnerName: user.name,
                     coins: order.coins // Assuming you have a function to calculate the refund coins
                 });
                 await order.save();
@@ -1301,7 +1301,7 @@ router.put("/cancel-order/:orderId/:phone", verify, async (req, res) => {
             }
         }
         catch (error) {
-            console.log(error.message)
+            console.log(error)
             res.status(500).json({ error: error.message });
         }
     }
