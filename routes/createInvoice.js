@@ -98,6 +98,9 @@ function generateProductDetails(doc, invoice) {
 
 function generatePaymentDetails(doc, invoice) {
     const productDetailsTop = 390;
+    const finalPrice = parseInt(invoice.deviceInfo.finalPrice);
+    const promoPrice = invoice?.promo?.price ? parseInt(invoice?.promo?.price) : 0;
+    const devicePrice = finalPrice - promoPrice;
 
     doc
         .fillColor("#444444")
@@ -108,12 +111,18 @@ function generatePaymentDetails(doc, invoice) {
 
     doc
         .fontSize(10)
-        .text("Price:", 50, productDetailsTop + 30)
+        .text("Device Price:", 50, productDetailsTop + 30)
         .font("Helvetica")
-        .text(`Rs ${invoice.deviceInfo.finalPrice}`, 150, productDetailsTop + 30) // 
+        .text(`Rs ${devicePrice}`, 150, productDetailsTop + 30) // 
+        .text("Promo Price:", 50, productDetailsTop + 50)
+        .font("Helvetica")
+        .text(`${invoice?.promo?.price ? `Rs ${invoice?.promo?.price}` : "Not Applicable"}`, 150, productDetailsTop + 50) // 
+        .text("Total Price:", 50, productDetailsTop + 70)
+        .font("Helvetica")
+        .text(`Rs ${invoice.deviceInfo.finalPrice}`, 150, productDetailsTop + 70) // 
         .font("Helvetica-Bold")
-        .text("Status:", 50, productDetailsTop + 50)
-        .text("Paid", 150, productDetailsTop + 50)
+        .text("Status:", 50, productDetailsTop + 90)
+        .text("Paid", 150, productDetailsTop + 90)
         // Assuming price is in cents and needs to be converted to a number
         .moveDown();
 
