@@ -19,8 +19,9 @@ const secretKey = process.env.JWT_SECRET_KEY
 async function sendNotificationsToPartnersAsync(partnerTokens, notification) {
     try {
         await Promise.all(partnerTokens.map((token, index) => {
-            getMessaging().send({ token: token, notification: notification })
-            console.log(index)
+            if (token) {
+                getMessaging().send({ token: token, notification: notification })
+            }
         }
 
         ));

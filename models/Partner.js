@@ -10,6 +10,13 @@ const pickUpSchema = new mongoose.Schema({
     otpExpiry: Date,
     status: { type: String, default: "active" },
     token: { type: String, default: "" },
+    notification: [{
+        type: { type: String },
+        title: { type: String },
+        body: { type: String },
+        timestamp: { type: Date, default: Date.now },
+        orderID: { type: String }
+    }]
 })
 
 const PartnerSchema = new mongoose.Schema({
@@ -27,6 +34,8 @@ const PartnerSchema = new mongoose.Schema({
     otpExpiry: Date,
     status: { type: String, default: "active" },
     token: { type: String, default: "" },
+    gstIN: { type: String, default: "" },
+    companyName: { type: String, default: "" },
     transaction: [{
         type: { type: String },
         paymentId: { type: String },
@@ -39,6 +48,13 @@ const PartnerSchema = new mongoose.Schema({
         message: { type: String },
         timestamp: { type: Date, default: Date.now },
         image: { type: String },
+        orderID: { type: String }
+    }],
+    notification: [{
+        type: { type: String },
+        title: { type: String },
+        body: { type: String },
+        timestamp: { type: Date, default: Date.now },
         orderID: { type: String }
     }]
 })

@@ -49,7 +49,9 @@ router.post("/create-partner", async (req, res) => {
             email,
             address,
             pinCodes,
-            state
+            state,
+            gstIN,
+            companyName
         } = req.body;
 
         // Check if partner with the provided phone number already exists
@@ -68,7 +70,9 @@ router.post("/create-partner", async (req, res) => {
             state,
             pickUp: [],
             role: "Partner",
-            coins: "0"
+            coins: "0",
+            gstIN,
+            companyName
         });
 
         await newPartner.save();
@@ -187,7 +191,10 @@ router.put('/update-partner/:id', async (req, res) => {
             email,
             address,
             pinCodes,
-            state
+            state,
+            status,
+            gstIN,
+            companyName
         } = req.body;
 
         // Find the partner by ID
@@ -201,11 +208,14 @@ router.put('/update-partner/:id', async (req, res) => {
         partner.address = address || partner.address;
         partner.pinCodes = pinCodes || partner.pinCodes;
         partner.state = state || partner.state;
+        partner.status = status || partner.status;
+        partner.gstIN = gstIN || partner.gstIN;
+        partner.companyName = companyName || partner.companyName;
 
         // Save updated partner details
         await partner.save();
 
-        res.json({ message: "Partner updated successfully", partner });
+        res.json({ message: "Partner updated successfully" });
     } catch (error) {
         if (error.code === 11000 && error.keyPattern && error.keyPattern.phone) {
             res.status(400).json({ error: "A Partner with this phone number already exists" })
@@ -974,10 +984,17 @@ router.post("/assign-order/:partnerPhone/:pickUpPersonId/:orderId", verify, asyn
             order.logs.unshift({
                 message: `Order Assigned to Pickup person ${pickUpPerson.name} (${pickUpPerson.phone})`,
             });
+            pickUpPerson.notification.unshift({
+                type: "assigned",
+                title: `Hey ${pickUpPerson.name}`,
+                body: `A new order is waiting for you: ${order.orderId}!`,
+                orderId: order._id
+            });
+            await partner.save();
             await order.save();
             const notification = {
                 title: `Hey ${pickUpPerson.name} `,
-                body: `A new order is waiting for you ${order.productDetails.name} !!`
+                body: `A new order is waiting for you ${order.orderId} !!`
             }
             const token = pickUpPerson.token;
             if (token) {
@@ -1138,8 +1155,15 @@ router.put("/requote/partner/:phone/:orderId", verify, async (req, res) => {
                 // Update product price and options
                 order.productDetails.price = price;
                 order.productDetails.options = options;
+                user.notification.unshift({
+                    type: "requoted",
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has requoted order ${order.orderId} !!`,
+                    orderID: order.orderId
+                })
 
                 // Save updated order
+                await user.save();
                 await order.save();
                 const notification = {
                     title: `Hey ${user.name} `,
@@ -1274,6 +1298,13 @@ router.put("/cancel-order/:orderId/:phone", verify, async (req, res) => {
                     Cancellation Reason : ${cancellationReason} `,
                 });
 
+                user.notification.unshift({
+                    type: "cancelled",
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has cancelled order ${order.orderId} !!`,
+                    orderID: order.orderId
+                })
+
 
                 order.status = 'cancelled';
                 order.cancellationReason = cancellationReason;
@@ -1284,6 +1315,7 @@ router.put("/cancel-order/:orderId/:phone", verify, async (req, res) => {
                     partnerName: user.name,
                     coins: order.coins // Assuming you have a function to calculate the refund coins
                 });
+                await user.save();
                 await order.save();
                 await newRefund.save();
                 const notification = {
@@ -1329,6 +1361,10 @@ router.put("/complete-order/:orderId/:phone", verify, async (req, res) => {
 
                     return res.status(200).json({ message: "No Access to perform this action" })
                 }
+                if (order.status === "Completed") {
+
+                    return res.status(200).json({ message: "Order Already Completed" })
+                }
                 order.logs.unshift({
                     message: `Order was completed by Partner ${order.partner.partnerName} (${order.partner.partnerPhone})`,
                 });
@@ -1363,11 +1399,21 @@ router.put("/complete-order/:orderId/:phone", verify, async (req, res) => {
                 if (order.partner.pickUpPersonPhone != phone) {
                     return res.status(200).json({ message: "No Access to perform this action" })
                 }
+                if (order.status === "Completed") {
+                    return res.status(200).json({ message: "Order Already Completed" })
+                }
                 order.logs.unshift({
                     message: `Order was completed by Pickup person ${order.partner.pickUpPersonName}`,
                 });
                 order.deviceInfo = deviceInfo
                 order.status = 'Completed';
+                user.notification.unshift({
+                    type: "completed",
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has completed order ${order.orderId} !!`,
+                    orderID: order.orderId
+                })
+                await user.save();
                 await order.save();
                 const notification = {
                     title: `Hey ${user.name} `,
@@ -1451,9 +1497,16 @@ router.put("/reschedule-order/:orderId/:phone", verify, async (req, res) => {
                 order.logs.unshift({
                     message: `Order was rescheduled by Pickup person ${order.partner.pickUpPersonName} (${order.partner.pickUpPersonPhone}) from ${order.pickUpDetails.date} ${pickUpDetails.time} to ${pickUpDetails.date} ${pickUpDetails.time} Reschedule reason : ${pickUpDetails.reason}  `,
                 });
+                user.notification.unshift({
+                    type: "cancelled",
+                    title: `Hey ${user.name} `,
+                    body: `Your pickup person ${pickUpPerson.name} has rescheduled order ${order.orderId} !!`,
+                    orderID: order.orderId
+                })
 
                 order.pickUpDetails = pickUpDetails;
                 order.status = 'rescheduled';
+                await user.save();
                 await order.save();
                 const notification = {
                     title: `Hey ${user.name} `,
