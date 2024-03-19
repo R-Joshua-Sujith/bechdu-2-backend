@@ -1196,6 +1196,7 @@ router.put("/requote/partner/:phone/:orderId", verify, async (req, res) => {
 });
 
 router.put("/update-coins-after-payment/:phone", verify, async (req, res) => {
+    console.log(req.body);
     const phone = req.params.phone;
     const { coins, price, gstPrice, paymentId, gstPercentage } = req.body;
 

@@ -239,6 +239,9 @@ router.get('/get-all-orders', async (req, res) => {
 
         // Format createdAt timestamps before sending response
         const formattedOrders = allOrders.map(order => {
+            const productPrice = parseInt(order.productDetails?.price) || 0;
+            const promoPrice = !isNaN(parseInt(order.promo?.price)) ? parseInt(order.promo?.price) : 0;
+            const totalPrice = productPrice + promoPrice;
             return {
                 ...order.toObject(),
                 createdAt: order.createdAt.toLocaleString('en-IN', {
@@ -249,7 +252,8 @@ router.get('/get-all-orders', async (req, res) => {
                     minute: '2-digit',
                     hour12: false,
                     timeZone: 'Asia/Kolkata' // Indian Standard Time
-                })
+                }),
+                totalPrice: totalPrice
             };
         });
 
@@ -410,6 +414,8 @@ router.put('/:orderId/complete', async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error' })
     }
 })
+
+
 
 router.get('/generate-invoice/:phone/:orderID', verify, async (req, res) => {
     if (req.user.phone === req.params.phone) {
