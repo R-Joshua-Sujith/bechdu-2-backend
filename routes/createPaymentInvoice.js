@@ -64,12 +64,17 @@ function generateCustomerInformation(doc, invoice) {
         .text(invoice.user.phone, 150, customerInformationTop + 40)
         .text("State:", 50, customerInformationTop + 60)
         .text(invoice.user.state, 150, customerInformationTop + 60)
+        .text("GSTIN:", 50, customerInformationTop + 80)
+        .text(invoice.user.gstIN, 150, customerInformationTop + 80)
+        .text("companyName:", 50, customerInformationTop + 100)
+        .text(invoice.user.companyName, 150, customerInformationTop + 100)
+
 
     // generateHr(doc, 252);
 }
 
 function generateProductDetails(doc, invoice) {
-    const productDetailsTop = 300;
+    const productDetailsTop = 360;
 
     doc
         .fillColor("#444444")

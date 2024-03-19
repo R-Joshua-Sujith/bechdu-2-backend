@@ -1602,6 +1602,8 @@ router.get("/transaction/:partnerPhone/:transactionId", verify, async (req, res)
                 name: partner.name,
                 address: partner.address,
                 state: partner.state,
+                gstIN: partner.gstIN,
+                companyName: partner.companyName
             };
             const invoice = {
                 user,
