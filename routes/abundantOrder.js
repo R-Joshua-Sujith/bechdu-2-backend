@@ -30,6 +30,9 @@ router.post("/create-order", verify, async (req, res) => {
                 user, productDetails, platform
             } = req.body;
             const existingUser = await UserModel.findOne({ phone: user.phone })
+            if (existingUser.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
             existingUser.city = user.city;
             existingUser.pincode = user.pincode;
 

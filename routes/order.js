@@ -80,7 +80,6 @@ const verify = (req, res, next) => {
 
 
 router.post('/create-order', verify, async (req, res) => {
-    console.log(req.body)
     if (req.user.phone === req.body.user.phone) {
         try {
             const {
@@ -94,6 +93,9 @@ router.post('/create-order', verify, async (req, res) => {
             console.log(req.body);
             const orderID = await generateCustomID();
             const existingUser = await UserModel.findOne({ phone: user.phone })
+            if (existingUser.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
             existingUser.name = user.name;
             existingUser.addPhone = user.addPhone;
             existingUser.email = user.email;
@@ -186,6 +188,10 @@ router.get('/get-user-orders/:phone', async (req, res) => {
 router.get('/get-user-order/:phone', verify, async (req, res) => {
     if (req.user.phone === req.params.phone) {
         try {
+            let user = await UserModel.findOne({ phone: req.params.phone });
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
             const { phone } = req.params;
             const orders = await OrderModel.find({ 'user.phone': phone }).select('-deviceInfo').sort({ createdAt: -1 });
             if (!orders || orders.length === 0) {
@@ -359,6 +365,10 @@ router.put('/:orderId/user-cancel', verify, async (req, res) => {
     const { cancellationReason } = req.body;
     if (req.user.phone === req.body.phone) {
         try {
+            let user = await UserModel.findOne({ phone: req.body.phone });
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
             const order = await OrderModel.findById(orderId);
 
             if (!order) {
@@ -404,7 +414,10 @@ router.put('/:orderId/complete', async (req, res) => {
 router.get('/generate-invoice/:phone/:orderID', verify, async (req, res) => {
     if (req.user.phone === req.params.phone) {
         try {
-
+            let user = await UserModel.findOne({ phone: req.params.phone });
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
             // Mocking order details for testing, replace this with your actual logic to fetch order details
             const orderID = req.params.orderID;
             const order = await OrderModel.findById(orderID);

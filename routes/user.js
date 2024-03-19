@@ -389,6 +389,9 @@ router.post('/users/add-address', verify, async (req, res) => {
             if (!user) {
                 return res.status(404).json({ message: 'User not found' });
             }
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
 
             // Add the address to the user's address array
             user.address.push(address);
@@ -416,6 +419,9 @@ router.delete('/users/delete-address/:phone/:index', verify, async (req, res) =>
 
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
+            }
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
             }
 
             // Check if the index is valid
@@ -447,6 +453,9 @@ router.get('/get-user-info/:phone', verify, async (req, res) => {
         try {
             const { phone } = req.params;
             const user = await UserModel.findOne({ phone });
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
             if (!user) {
                 console.log(error)
                 return res.status(404).json({ error: 'User not found' });
@@ -485,6 +494,9 @@ router.post("/save-user/:phone", verify, async (req, res) => {
             const user = await UserModel.findOne({ phone });
             if (!user) {
                 return res.status(404).json({ error: "User not found" })
+            }
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
             }
             user.name = name;
             user.email = email;
@@ -547,6 +559,9 @@ router.put('/users/:phoneNumber/pincode', verify, async (req, res) => {
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
             }
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
+            }
 
             // Update the pincode field
             user.pincode = newPincode;
@@ -576,6 +591,9 @@ router.put('/users/:phoneNumber/city', verify, async (req, res) => {
 
             if (!user) {
                 return res.status(404).json({ error: 'User not found' });
+            }
+            if (user.status !== "active") {
+                return res.status(403).json({ error: "No Access to perform this action" })
             }
 
             // Update the pincode field
