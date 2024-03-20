@@ -24,6 +24,7 @@ const pickUpRoute = require("./routes/pickUp");
 const refundRoute = require("./routes/refund");
 const paymentRoute = require("./routes/payment")
 const contactRoute = require("./routes/contact")
+const requestRoute = require("./routes/request")
 
 dotenv.config();
 const app = express();
@@ -92,6 +93,7 @@ app.use("/pickup", pickUpRoute);
 app.use("/refund", refundRoute);
 app.use("/payment", paymentRoute);
 app.use("/contact", contactRoute);
+app.use("/request", requestRoute);
 
 
 
