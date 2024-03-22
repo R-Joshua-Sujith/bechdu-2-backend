@@ -227,12 +227,14 @@ router.get('/get-all-orders', async (req, res) => {
                 { 'partner.partnerName': searchRegex },
                 { 'partner.partnerPhone': searchRegex },
                 { 'partner.pickUpPersonPhone': searchRegex },
-                { 'partner.pickUpPersonName': searchRegex }
+                { 'partner.pickUpPersonName': searchRegex },
+                { status: searchRegex }
             ],
         };
 
         const allOrders = await OrderModel.find(query)
-            .select('-deviceInfo')
+            .select('-deviceInfo.deviceBill -deviceInfo.imeiNumber -deviceInfo.idCard -deviceInfo.deviceImages ')
+            .populate('deviceInfo', 'finalPrice')
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(parseInt(pageSize));
