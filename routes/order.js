@@ -158,8 +158,15 @@ router.post('/create-order', verify, async (req, res) => {
             // Send notifications to partners asynchronously
             sendNotificationsToPartnersAsync(partnerTokens, notification);
 
-
-
+            partners.forEach(async partner => {
+                partner.notification.unshift({
+                    type: "new",
+                    title: `${savedOrder.productDetails.name}`,
+                    body: `You have received a new order ${savedOrder.orderId}`,
+                    orderId: savedOrder._id
+                });
+                await partner.save();
+            });
 
             res.status(201).json({ message: 'Order created successfully', order: savedOrder });
         } catch (error) {
