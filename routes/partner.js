@@ -1808,7 +1808,7 @@ router.get("/notifications/:phone", verify, async (req, res) => {
             }
             if (req.user.phone === phone && req.user.loggedInDevice === partner.loggedInDevice && partner.status !== "blocked") {
                 const notifications = partner.notification.slice(skip, skip + parseInt(pageSize))
-                res.json({ data: notifications });
+                res.json({ data: notifications, length: partner.notification.length });
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
             }
@@ -1830,7 +1830,55 @@ router.get("/notifications/:phone", verify, async (req, res) => {
             if (req.user.phone === phone && req.user.loggedInDevice === pickUpPerson.loggedInDevice && pickUpPerson.status !== "blocked") {
 
                 const notifications = pickUpPerson.notification.slice(skip, skip + parseInt(pageSize))
-                res.json({ data: notifications });
+                res.json({ data: notifications, length: pickUpPerson.notification.length });
+            } else {
+                res.status(403).json({ error: `No Access to perform this action ` });
+            }
+        }
+        catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+});
+
+
+router.get("/logout/:phone", verify, async (req, res) => {
+    const phone = req.params.phone;
+    if (req.user.role === "Partner") {
+        try {
+            const partner = await PartnerModel.findOne({ phone }).select('-transaction'); // Find the partner in the database by phone number
+            if (!partner) {
+                return res.status(404).json({ message: "Partner not found" }); // If partner not found, return 404
+            }
+            if (req.user.phone === phone && req.user.loggedInDevice === partner.loggedInDevice && partner.status !== "blocked") {
+                partner.loggedInDevice = "";
+                partner.token = "";
+                await partner.save();
+                res.json({ message: "Logout Successful" })
+            } else {
+                res.status(403).json({ error: `No Access to perform this action ` });
+            }
+
+            // Respond with the partner data in JSON format
+        } catch (error) {
+            res.status(500).json({ error: error.message }); // Handle errors
+        }
+    } else if (req.user.role === "pickUp") {
+        try {
+            const user = await PartnerModel.findOne({ 'pickUpPersons.phone': phone });
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+            const pickUpPerson = user.pickUpPersons.find(person => person.phone === phone);
+            if (!pickUpPerson) {
+                return res.status(400).json({ error: "User not found" });
+            }
+            if (req.user.phone === phone && req.user.loggedInDevice === pickUpPerson.loggedInDevice && pickUpPerson.status !== "blocked") {
+                pickUpPerson.loggedInDevice = "";
+                pickUpPerson.token = "";
+                await user.save();
+                res.json({ message: "Logout Successful" })
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
             }
