@@ -997,7 +997,7 @@ router.post("/assign-order/:partnerPhone/:pickUpPersonId/:orderId", verify, asyn
                 type: "assigned",
                 title: `Hey ${pickUpPerson.name}`,
                 body: `A new order is waiting for you: ${order.orderId}!`,
-                orderId: order._id
+                orderID: order._id
             });
             await partner.save();
             await order.save();
@@ -1168,7 +1168,7 @@ router.put("/requote/partner/:phone/:orderId", verify, async (req, res) => {
                     type: "requoted",
                     title: `Hey ${user.name} `,
                     body: `Your pickup person ${pickUpPerson.name} has requoted order ${order.orderId} !!`,
-                    orderID: order.orderId
+                    orderID: order._id
                 })
 
                 // Save updated order
@@ -1312,7 +1312,7 @@ router.put("/cancel-order/:orderId/:phone", verify, async (req, res) => {
                     type: "cancelled",
                     title: `Hey ${user.name} `,
                     body: `Your pickup person ${pickUpPerson.name} has cancelled order ${order.orderId} !!`,
-                    orderID: order.orderId
+                    orderID: order._id
                 })
 
 
@@ -1421,7 +1421,7 @@ router.put("/complete-order/:orderId/:phone", verify, async (req, res) => {
                     type: "completed",
                     title: `Hey ${user.name} `,
                     body: `Your pickup person ${pickUpPerson.name} has completed order ${order.orderId} !!`,
-                    orderID: order.orderId
+                    orderID: order._id
                 })
                 await user.save();
                 await order.save();
@@ -1511,7 +1511,7 @@ router.put("/reschedule-order/:orderId/:phone", verify, async (req, res) => {
                     type: "cancelled",
                     title: `Hey ${user.name} `,
                     body: `Your pickup person ${pickUpPerson.name} has rescheduled order ${order.orderId} !!`,
-                    orderID: order.orderId
+                    orderID: order._id
                 })
 
                 order.pickUpDetails = pickUpDetails;
