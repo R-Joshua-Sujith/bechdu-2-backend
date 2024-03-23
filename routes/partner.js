@@ -1808,7 +1808,7 @@ router.get("/notifications/:phone", verify, async (req, res) => {
             }
             if (req.user.phone === phone && req.user.loggedInDevice === partner.loggedInDevice && partner.status !== "blocked") {
                 const notifications = partner.notification.slice(skip, skip + parseInt(pageSize))
-                res.json(notifications);
+                res.json({ data: notifications });
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
             }
@@ -1830,7 +1830,7 @@ router.get("/notifications/:phone", verify, async (req, res) => {
             if (req.user.phone === phone && req.user.loggedInDevice === pickUpPerson.loggedInDevice && pickUpPerson.status !== "blocked") {
 
                 const notifications = pickUpPerson.notification.slice(skip, skip + parseInt(pageSize))
-                res.json(notifications);
+                res.json({ data: notifications });
             } else {
                 res.status(403).json({ error: `No Access to perform this action ` });
             }
