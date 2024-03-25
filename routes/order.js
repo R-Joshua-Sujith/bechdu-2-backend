@@ -163,7 +163,7 @@ router.post('/create-order', verify, async (req, res) => {
                     type: "new",
                     title: `${savedOrder.productDetails.name}`,
                     body: `You have received a new order ${savedOrder.orderId}`,
-                    orderId: savedOrder._id
+                    orderID: savedOrder._id
                 });
                 await partner.save();
             });
