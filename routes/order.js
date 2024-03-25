@@ -19,7 +19,7 @@ const secretKey = process.env.JWT_SECRET_KEY
 async function sendNotificationsToPartnersAsync(partnerTokens, notification) {
     try {
         await Promise.all(partnerTokens.map((token, index) => {
-            if (token) {
+            if (token !== "") {
                 getMessaging().send({ token: token, notification: notification })
             }
         }
@@ -149,7 +149,8 @@ router.post('/create-order', verify, async (req, res) => {
                 'productDetails.slug': productDetails.slug,
             });
 
-            const partners = await PartnerModel.find({ pinCodes: orderPincode, token: { $ne: "" } });
+            // const partners = await PartnerModel.find({ pinCodes: orderPincode, token: { $ne: "" } });
+            const partners = await PartnerModel.find({ pinCodes: orderPincode });
             const partnerTokens = partners.map(partner => partner.token);
             const notification = {
                 title: `${savedOrder.productDetails.name} 📱`,
