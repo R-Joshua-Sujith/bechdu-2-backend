@@ -533,15 +533,30 @@ router.get('/get-all-users', async (req, res) => {
         }
 
         const allUsers = await UserModel.find(query)
-            .select('email name phone addPhone pincode city')
+            .select('email name phone addPhone pincode city createdAt')
             .sort({ createdAt: -1 }) // Assuming you have a createdAt field in your UserSchema
             .skip(skip)
             .limit(parseInt(pageSize));
 
+        const formattedUsers = allUsers.map(user => {
+            return {
+                ...user.toObject(),
+                createdAt: user.createdAt.toLocaleString('en-IN', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false,
+                    timeZone: 'Asia/Kolkata' // Indian Standard Time
+                })
+            };
+        });
+
         const totalUsers = await UserModel.countDocuments(query);
         res.send({
             totalRows: totalUsers,
-            data: allUsers,
+            data: formattedUsers,
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
