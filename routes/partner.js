@@ -1913,6 +1913,10 @@ router.put('/block-partner-app/:phone', verify, async (req, res) => {
             // Update the partner's status to "blocked"
             partner.status = "blocked";
 
+            for (const pickUpPerson of partner.pickUpPersons) {
+                pickUpPerson.status = "blocked";
+            }
+
             // Save the updated partner
             await partner.save();
 
