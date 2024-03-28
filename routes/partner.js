@@ -1931,8 +1931,4 @@ router.put('/block-partner-app/:phone', verify, async (req, res) => {
 });
 
 
-
-
-
-
 module.exports = router;
