@@ -1900,12 +1900,13 @@ router.get("/logout/:phone", verify, async (req, res) => {
 router.put('/block-partner-app/:phone', verify, async (req, res) => {
     try {
         const { phone } = req.params;
+        const { otp } = req.body;
 
         // Fetch the partner using their phone number
-        const partner = await PartnerModel.findOne({ phone });
+        const partner = await PartnerModel.findOne({ phone, otp, otpExpiry: { $gt: Date.now() } });
 
         if (!partner) {
-            return res.status(404).json({ error: "Partner not found" });
+            return res.status(404).json({ error: "Invalid OTP" });
         }
 
         // Check if the requesting user has access to perform this action
