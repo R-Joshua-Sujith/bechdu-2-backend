@@ -497,6 +497,9 @@ router.post('/send-sms', async (req, res) => {
                 return res.status(404).json({ message: "User not found" })
             }
             const pickUpPerson = user.pickUpPersons.find(person => person.phone === mobileNumber);
+            if (pickUpPerson.status !== "active") {
+                return res.status(403).json({ error: "Your account has been blocked" });
+            }
             const result = await sendSMS(formattedMobileNumber);
             if (result && result.otp && result.otpExpiry) {
                 const { otp, otpExpiry } = result;
@@ -508,6 +511,9 @@ router.post('/send-sms', async (req, res) => {
                 res.status(500).json({ error: 'Failed to send OTP' });
             }
         } else {
+            if (partner.status !== "active") {
+                return res.status(403).json({ error: "Your account has been blocked" });
+            }
             const result = await sendSMS(formattedMobileNumber);
             if (result && result.otp && result.otpExpiry) {
                 const { otp, otpExpiry } = result;
@@ -1889,6 +1895,39 @@ router.get("/logout/:phone", verify, async (req, res) => {
     }
 
 });
+
+
+router.put('/block-partner-app/:phone', verify, async (req, res) => {
+    try {
+        const { phone } = req.params;
+
+        // Fetch the partner using their phone number
+        const partner = await PartnerModel.findOne({ phone });
+
+        if (!partner) {
+            return res.status(404).json({ error: "Partner not found" });
+        }
+
+        // Check if the requesting user has access to perform this action
+        if (req.user.phone === phone && req.user.loggedInDevice === partner.loggedInDevice && partner.status !== "blocked") {
+            // Update the partner's status to "blocked"
+            partner.status = "blocked";
+
+            // Save the updated partner
+            await partner.save();
+
+            res.json({ message: "Partner account blocked successfully" });
+        } else {
+            // Return 403 Forbidden if access is denied
+            res.status(403).json({ error: "No access to perform this action" });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
 
 
 
